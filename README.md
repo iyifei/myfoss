@@ -69,3 +69,16 @@ return [
  
  file:File 
   ```
+
+<code>
+
+获取缩略图-支持视频/图片
+
+http://myfoss.minyifei.cn/[key]??thumbnail=w-200/h-150
+
+获取改key对应的宽度为200px和150高的缩略图
+
+示例：
+
+http://myfoss.minyifei.cn//xjkx02.mp4?thumbnail=w-200
+</code>
