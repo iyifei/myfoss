@@ -49,3 +49,23 @@ return [
 ];
   
  ```
+ 
+ 用法：
+ 
+ ``` txt 
+ 上传文件：
+ 
+ 地址：
+ http://myfoss.minyifei.cn/upload.php
+ 
+ 
+ 
+ HEADERS:
+
+ Content-Type: multipart/form-data
+ filename: test/file-abc.jpg
+ 
+ Body
+ 
+ file:File 
+  ```
