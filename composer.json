@@ -1,0 +1,14 @@
+{
+    "autoload": {
+        "psr-4": {
+            "Myf\\": "Myf/"
+        }
+    },
+    "require": {
+        "league/flysystem": "^1.0",
+        "overtrue/flysystem-qiniu": "^1.0",
+        "xxtime/flysystem-aliyun-oss": "^1.2",
+        "intervention/image": "^2.4",
+        "illuminate/container": "^5.4"
+    }
+}
