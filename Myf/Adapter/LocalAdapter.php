@@ -12,6 +12,7 @@ namespace Myf\Adapter;
 use Intervention\Image\ImageManagerStatic;
 use League\Flysystem\Adapter\Local;
 use Myf\GEnum\ExtensionType;
+use Myf\Libs\AdapterManager;
 use Myf\Libs\FfmpegUtil;
 
 class LocalAdapter extends Local
@@ -33,6 +34,74 @@ class LocalAdapter extends Local
         return sprintf("%s/oss/%s",$this->domain,$key);
     }
 
+    /**
+     * 获取文件基本信息
+     * @param $key
+     * @return array
+     */
+    public function getInfo($key){
+        $pathInfo = pathinfo($key);
+        $ext = $pathInfo['extension'];
+        //本机文件
+        $file = sprintf("%s/%s",$this->root,$key);
+        $fs = AdapterManager::getFilesystem();
+        $info = [
+            'basename'=>$pathInfo['basename'],
+            'filename'=>$pathInfo['filename'],
+            'format'=>strtolower($ext),
+            'mimetype'=>$fs->getMimetype($key),
+            'key'=>$key,
+            'size'=>intval(filesize($file)),
+        ];
+        //转换为文件格式
+        $type = ExtensionType::switchType($ext);
+        switch ($type){
+            //图片
+            case ExtensionType::IMAGE:
+                $imageInfo = getimagesize($file);
+                $info['width']=intval($imageInfo[0]);
+                $info['height']=intval($imageInfo[1]);
+                break;
+            //视频
+            case ExtensionType::VIDEO;
+                $tmpPath = sys_get_temp_dir();
+                $tmpFile = sprintf("%s/%s.jpg",rtrim($tmpPath,'/'),uniqid(rand(1,1000),true));
+                $videoInfo = FfmpegUtil::createVideoThumbAndGetInfo($file,$tmpFile);
+                if(is_file($tmpFile)){
+                    //保存视频截图key
+                    $originThumbKey = sprintf("%s.jpg",$key);
+                    if(!$fs->has($originThumbKey)){
+                        $stream = fopen($tmpFile,'r+');
+                        $fs->putStream($originThumbKey,$stream);
+                        if(is_resource($stream)){
+                            fclose($stream);
+                        }
+                    }
+                    //读取视频基本信息
+                    $video = $videoInfo['video'];
+                    $vcodeArr =explode(" ",$video['vcodec']);
+                    $info['duration']=$video['duration'];
+                    $info['seconds']=$video['seconds'];
+                    $info['start']=$video['start'];
+                    $info['width']=intval($video['width']);
+                    $info['height']=intval($video['height']);
+                    $info['vcodec']=trim($vcodeArr[0]);
+                }
+                break;
+            default:
+                $info['size'] = $fs->getSize($key);
+                break;
+        }
+        return $info;
+
+    }
+
+    /**
+     * 获取缩略图地址
+     * @param $key
+     * @param $param
+     * @return string
+     */
     public function getThumbnail($key,$param){
         $pathInfo = pathinfo($key);
         $ext = $pathInfo['extension'];

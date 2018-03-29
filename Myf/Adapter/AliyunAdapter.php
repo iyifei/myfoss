@@ -40,6 +40,72 @@ class AliyunAdapter extends OssAdapter
 
 
     /**
+     * 获取阿里云的文件基本属性信息
+     * @param $key
+     * @return array
+     */
+    public function getInfo($key){
+        $pathInfo = pathinfo($key);
+        $ext = $pathInfo['extension'];
+        $url = $this->getUrl($key);
+        $fs = AdapterManager::getFilesystem();
+        $info = [
+            'basename'=>$pathInfo['basename'],
+            'filename'=>$pathInfo['filename'],
+            'format'=>strtolower($ext),
+            'mimetype'=>$fs->getMimetype($key),
+            'key'=>$key,
+        ];
+        //转换为文件格式
+        $type = ExtensionType::switchType($ext);
+        switch ($type){
+            //图片
+            case ExtensionType::IMAGE:
+                $imgInfoUrl = sprintf("%s?x-oss-process=image/info",$url);
+                $data = file_get_contents($imgInfoUrl);
+                if(!empty($data)){
+                    $json = json_decode($data,true);
+                    $info['size']=intval($json['FileSize']['value']);
+                    $info['format']=strtolower($json['Format']['value']);
+                    $info['height']=intval($json['ImageHeight']['value']);
+                    $info['width']=intval($json['ImageWidth']['value']);
+                }
+                break;
+            //视频
+            case ExtensionType::VIDEO;
+                $tmpPath = sys_get_temp_dir();
+                $tmpFile = sprintf("%s/%s.jpg",rtrim($tmpPath,'/'),uniqid(rand(1,1000),true));
+                $videoInfo = FfmpegUtil::createVideoThumbAndGetInfo($url,$tmpFile);
+                if(is_file($tmpFile)){
+                    //保存视频截图key
+                    $originThumbKey = sprintf("%s.jpg",$key);
+                    if(!$fs->has($originThumbKey)){
+                        $stream = fopen($tmpFile,'r+');
+                        $fs->putStream($originThumbKey,$stream);
+                        if(is_resource($stream)){
+                            fclose($stream);
+                        }
+                    }
+                    //读取视频基本信息
+                    $video = $videoInfo['video'];
+                    $vcodeArr =explode(" ",$video['vcodec']);
+                    $info['duration']=$video['duration'];
+                    $info['seconds']=$video['seconds'];
+                    $info['start']=$video['start'];
+                    $info['width']=intval($video['width']);
+                    $info['height']=intval($video['height']);
+                    $info['vcodec']=trim($vcodeArr[0]);
+                    $info['size']=$fs->getSize($key);
+                }
+                break;
+            default:
+                $info['size'] = $fs->getSize($key);
+                break;
+        }
+        return $info;
+    }
+
+    /**
      * 获取阿里云的缩略图-支持图片缩略图
      * @param $key
      * @param $param

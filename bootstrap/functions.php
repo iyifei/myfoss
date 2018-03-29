@@ -251,3 +251,45 @@ function isInWeixin(){
         return true;
     }
 }
+
+/**
+ *      把秒数转换为时分秒的格式
+ *      @param Int $times 时间，单位 秒
+ *      @return String
+ */
+function secToTime($times){
+    $result = '00:00:00.00';
+    if ($times>0) {
+        $hour = floor($times/3600);
+        if($hour<10 && $hour>=0){
+            $hour='0'.$hour;
+        }
+        $minute = floor(($times-3600 * $hour)/60);
+        if($minute<10 && $minute>=0){
+            $minute="0".$minute;
+        }
+        $second = floor((($times-3600 * $hour) - 60 * $minute) % 60);
+        if($second<10){
+            $second="0".$second;
+        }
+        //毫秒
+        $mm = '00';
+        $timeArr = explode('.',$times);
+        if(count($timeArr)==2){
+            $mm = $timeArr[1];
+        }
+        $result = $hour.':'.$minute.':'.$second.'.'.$mm;
+    }
+    return $result;
+}
+
+/**
+ * 时间格式转为秒
+ * @param String $time XX:XX:XX
+ * @return int 秒
+ */
+function timeToSec($time){
+    $sp = explode(":",$time);
+    $sec = intval($sp[0])*3600+intval($sp[1])*60+intval($sp[2]);
+    return $sec;
+}

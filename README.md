@@ -1,5 +1,5 @@
 # myfoss
-云存储基于flysystem
+云存储基于flysystem,视频支持依赖ffmpeg
 
 可以灵活配置aliyun，七牛、本机存储
 
@@ -74,7 +74,7 @@ return [
 
 获取缩略图-支持视频/图片
 
-http://myfoss.minyifei.cn/[key]??thumbnail=w-200/h-150
+http://myfoss.minyifei.cn/[key]?thumbnail=w-200/h-150
 
 获取改key对应的宽度为200px和150高的缩略图
 
@@ -82,3 +82,66 @@ http://myfoss.minyifei.cn/[key]??thumbnail=w-200/h-150
 
 http://myfoss.minyifei.cn//xjkx02.mp4?thumbnail=w-200
 </code>
+
+
+
+获取文件基本信息-支持视频/图片/其他
+
+http://myfoss.minyifei.cn/[key]?info
+
+视频示例：
+
+http://myfoss.minyifei.cn/xjkx02.mp4?info,返回结果：
+
+``` json 
+{
+    "basename": "xjkx02.mp4",
+    "filename": "xjkx02",
+    "format": "mp4",
+    "mimetype": "video/mp4",
+    "key": "xjkx02.mp4",
+    "size": 2511197,
+    "duration": "00:00:15.02",
+    "seconds": 15.02,
+    "start": "0.000000",
+    "width": 856,
+    "height": 480,
+    "vcodec": "mpeg4"
+}  
+
+```
+
+图片示例：
+
+http://myfoss.minyifei.cn/test/file-abc.jpg?info,返回结果：
+
+``` json 
+{
+    "basename": "file-abc.jpg",
+    "filename": "file-abc",
+    "format": "jpg",
+    "mimetype": "image/jpeg",
+    "key": "test/file-abc.jpg",
+    "size": 131548,
+    "height": 592,
+    "width": 1024
+} 
+
+```
+
+
+其他文件示例：
+
+http://myfoss.minyifei.cn/ioncube.txt?info,返回结果：
+
+``` json 
+{
+    "basename": "ioncube.txt",
+    "filename": "ioncube",
+    "format": "txt",
+    "mimetype": "text/plain",
+    "key": "ioncube.txt",
+    "size": 1266
+}
+
+```

@@ -8,6 +8,7 @@
  */
 use Myf\GEnum\ExtensionType;
 use Myf\Libs\AdapterManager;
+use Myf\Plugin\FileInfo;
 use Myf\Plugin\FileThumbnail;
 use Overtrue\Flysystem\Qiniu\Plugins\FileUrl;
 
@@ -19,7 +20,7 @@ if(!empty($key) && $key!='/'){
     $key = ltrim($key, '/');
 
     //缩略图
-    $thumbnail = get('thumbnail');
+    $thumbnail = get('thumbnail',null);
     //缩略图参数
     $thumbParam = [];
     if(!empty($thumbnail)){
@@ -40,17 +41,26 @@ if(!empty($key) && $key!='/'){
         //资源后缀
         $pathInfo = pathinfo($key);
         $ext = $pathInfo['extension'];
-        //读取缩略图,需要是图片、视频格式
-        if(!empty($thumbParam) && ExtensionType::isSupportThumbnail($ext)){
-            $fileSystem->addPlugin(new FileThumbnail());
-            $url = $fileSystem->getThumbnail($key,$thumbParam);
+
+        //读取文件属性信息
+        if(isset($_GET['info'])){
+            $fileSystem->addPlugin(new FileInfo());
+            $info = $fileSystem->getInfo($key);
+            header('Content-Type:application/json; charset=utf-8');
+            exit(json_encode($info));
         }else{
-            //读取原图
-            $fileSystem->addPlugin(new FileUrl());
-            $url = $fileSystem->getUrl($key);
+            //读取缩略图,需要是图片、视频格式
+            if(!empty($thumbParam) && ExtensionType::isSupportThumbnail($ext)){
+                $fileSystem->addPlugin(new FileThumbnail());
+                $url = $fileSystem->getThumbnail($key,$thumbParam);
+            }else{
+                //返回原始文件
+                $fileSystem->addPlugin(new FileUrl());
+                $url = $fileSystem->getUrl($key);
+            }
+            header("Location:".$url);
+            exit;
         }
-        header("Location:".$url);
-        exit;
     }
 }
 Header("HTTP/1.1 404 Not Found");

@@ -2,6 +2,7 @@
 
 namespace Myf\Adapter;
 use Myf\GEnum\ExtensionType;
+use Myf\Libs\AdapterManager;
 
 /**
  * 七牛适配器
@@ -18,6 +19,63 @@ class QiniuAdapter extends \Overtrue\Flysystem\Qiniu\QiniuAdapter
         $bucket = $param['bucket'];
         $domain = $param['domain'];
         parent::__construct($accessKey, $secretKey, $bucket, $domain);
+    }
+
+    /**
+     * 获取资源基本信息
+     * @param $key
+     * @return array
+     */
+    public function getInfo($key){
+        $pathInfo = pathinfo($key);
+        $ext = $pathInfo['extension'];
+        $url = $this->getUrl($key);
+        $fs = AdapterManager::getFilesystem();
+        $info = [
+            'basename'=>$pathInfo['basename'],
+            'filename'=>$pathInfo['filename'],
+            'format'=>strtolower($ext),
+            'mimetype'=>$fs->getMimetype($key),
+            'key'=>$key,
+        ];
+        //转换为文件格式
+        $type = ExtensionType::switchType($ext);
+        switch ($type){
+            //图片
+            case ExtensionType::IMAGE:
+                $imgInfoUrl = sprintf("%s?imageInfo",$url);
+                $data = file_get_contents($imgInfoUrl);
+                if(!empty($data)){
+                    $json = json_decode($data,true);
+                    $info['size']=intval($json['size']);
+                    $info['height']=intval($json['height']);
+                    $info['width']=intval($json['width']);
+                }
+                break;
+            //视频
+            case ExtensionType::VIDEO;
+                $imgInfoUrl = sprintf("%s?avinfo",$url);
+                $data = file_get_contents($imgInfoUrl);
+                if(!empty($data)){
+                    //读取视频基本信息
+                    $videoInfo = json_decode($data,true);
+                    $streams = array_column($videoInfo['streams'],null,'codec_type');
+                    $video = $streams['video'];
+                    $format = $videoInfo['format'];
+                    $info['seconds']=round($format['duration'],2);
+                    $info['duration']=secToTime($info['seconds']);
+                    $info['start']=$video['start_time'];
+                    $info['width']=intval($video['width']);
+                    $info['height']=intval($video['height']);
+                    $info['vcodec']=$video['codec_name'];
+                    $info['size']=intval($format['size']);
+                }
+                break;
+            default:
+                $info['size'] = $fs->getSize($key);
+                break;
+        }
+        return $info;
     }
 
     /**
