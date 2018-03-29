@@ -6,28 +6,13 @@
  * Time: 15:26
  */
 
-use Illuminate\Container\Container;
-use League\Flysystem\AdapterInterface;
-use League\Flysystem\Filesystem;
+use Myf\Libs\AdapterManager;
 use Overtrue\Flysystem\Qiniu\Plugins\FileUrl;
 
 define("APP_PATH",__DIR__);
 require_once APP_PATH.'/bootstrap/core.php';
 
-//初始化容器
-$container = Container::getInstance();
-//配置信息
-$adapterConfig = config('base.adapter');
-//读取自定义的扩展
-$container->bind(AdapterInterface::class,$adapterConfig['class']);
-$container->when($adapterConfig['class'])->needs('$param')->give($adapterConfig['param']);
-
-//实例化Filesystem
-/**
- * @var Filesystem $fileSystem
- */
-$fileSystem = $container->make(Filesystem::class);
-
+$fileSystem = AdapterManager::getFilesystem();
 //上传的文件句柄名称
 $uploadName = 'file';
 
@@ -42,13 +27,19 @@ $fileSystem->putStream($key,$stream);
 if(is_resource($stream)){
     fclose($stream);
 }
-//获取访问地址
+
+//本机地址
+$domain = config('base.domain');
+$url = sprintf("%s/%s",$domain,$key);
+
+//原始地址,可用于下载
 $fileSystem->addPlugin(new FileUrl());
-$url = $fileSystem->getUrl($key);
+$origin = $fileSystem->getUrl($key);
 
 $data = [
     'key'=>$key,
-    'url'=>$url
+    'url'=>$url,
+    'origin'=>$origin,
 ];
 header('Content-Type:application/json; charset=utf-8');
 exit(json_encode($data));
