@@ -29,4 +29,7 @@ class ErrorCode
     //token错误
     const TOKEN_ERROR = 5;
 
+    //资源key错误
+    const KEY_ERROR = 6;
+
 }
