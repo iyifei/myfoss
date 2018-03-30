@@ -293,3 +293,34 @@ function timeToSec($time){
     $sec = intval($sp[0])*3600+intval($sp[1])*60+intval($sp[2]);
     return $sec;
 }
+
+/**
+ * 输出json格式，并退出
+ * @param $response
+ */
+function exitJson($response){
+   echoJson($response);
+   exit;
+}
+
+/**
+ * 输出json
+ * @param $response
+ */
+function echoJson($response){
+    header('Content-Type:application/json; charset=utf-8');
+    if(is_array($response)){
+        $response = json_encode($response);
+    }
+    echo $response;
+}
+
+/**
+ * 字符串签名
+ * @param $info
+ * @param $token
+ * @return string
+ */
+function signEncode($info,$token){
+    return md5(sprintf("%s_%s",md5($info),$token));
+}

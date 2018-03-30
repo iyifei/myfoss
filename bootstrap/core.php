@@ -5,6 +5,8 @@
  * Date: 2018/3/29
  * Time: 14:44
  */
+
+error_reporting(E_ALL ^ E_NOTICE);
 //统一编码为utf8
 mb_internal_encoding('UTF-8');
 //引入全局函数

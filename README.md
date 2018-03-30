@@ -1,5 +1,5 @@
 # myfoss
-云存储基于flysystem,视频支持依赖ffmpeg
+云存储基于flysystem,视频支持依赖ffmpeg，缓存依赖redis
 
 可以灵活配置aliyun，七牛、本机存储
 
