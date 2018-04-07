@@ -9,8 +9,6 @@
 namespace Myf\Libs;
 
 
-use Illuminate\Contracts\Logging\Log;
-
 class FfmpegUtil
 {
 
