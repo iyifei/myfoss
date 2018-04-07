@@ -20,12 +20,17 @@ $fileSystem = AdapterManager::getFilesystem();
 $uploadName = 'file';
 
 //授权token
-$token = getHeader('token');
+$token = request('token');
 $redis = RedisClient::getInstance();
 $tokenKey = sprintf("%s_%s",RedisKey::Token,$token);
 if($redis->get($tokenKey)){
+    // Support CORS
+    header("Access-Control-Allow-Origin: *");
+    if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+        exit; // finish preflight CORS requests here
+    }
     //oss存储的key
-    $key = getHeader('filename');
+    $key = request('key');
     //如果没有指定key，则用文件名作为key
     if(empty($key)){
         $key = $_FILES[$uploadName]['name'];

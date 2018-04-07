@@ -14,7 +14,7 @@ define("APP_PATH",__DIR__);
 require_once APP_PATH.'/bootstrap/core.php';
 $key = request('key');
 //授权token
-$token = getHeader('token');
+$token = request('token');
 $redis = RedisClient::getInstance();
 $tokenKey = sprintf("%s_%s",RedisKey::Token,$token);
 try{

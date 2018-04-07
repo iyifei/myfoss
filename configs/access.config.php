@@ -8,7 +8,7 @@
 return [
     //授权秘钥兑
     'JBCqTWJfEJoJCiYp'=>[
-        'access_key'=>'JBCqTWJfEJoJCiYp',
-        'access_token'=>'4pNbgaKeoU2rHpVGiLqtf9yRF0y3JoH4',
+        'appId'=>'JBCqTWJfEJoJCiYp',
+        'appSecret'=>'4pNbgaKeoU2rHpVGiLqtf9yRF0y3JoH4',
     ],
 ];

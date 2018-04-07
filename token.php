@@ -13,7 +13,7 @@ use Myf\Libs\RedisClient;
 define("APP_PATH",__DIR__);
 require_once APP_PATH.'/bootstrap/core.php';
 //授权key
-$accessKey = post('accessKey');
+$appId = post('appId');
 //过期时间,单位s-默认1小时
 $expire = getInteger('expire',3600);
 //授权签名
@@ -23,7 +23,7 @@ $time = post('time');
 //可用的tokens
 $access = config('access');
 try{
-    if(isset($access[$accessKey])){
+    if(isset($access[$appId])){
         //1天内有效
         $now = time();
         if($now-$time>24*3600){
@@ -31,9 +31,9 @@ try{
         }
 
         //校验签名
-        $accessToken = $access[$accessKey]['access_token'];
-        $info = sprintf("%s_%s_%s",$accessKey,$time,$expire);
-        $encodeSign = signEncode($info,$accessToken);
+        $appSecret = $access[$appId]['appSecret'];
+        $info = sprintf("%s_%s_%s",$appId,$time,$expire);
+        $encodeSign = signEncode($info,$appSecret);
         if($encodeSign!=$sign){
             throw new \Exception('sign error',ErrorCode::SIGN_ERROR);
         }
@@ -53,7 +53,7 @@ try{
             'data'=>$data,
         ];
     }else{
-        throw new \Exception('accessKey error',ErrorCode::ACCESS_KEY_ERROR);
+        throw new \Exception('access error',ErrorCode::ACCESS_KEY_ERROR);
     }
 }catch (\Exception $e){
     $res = [

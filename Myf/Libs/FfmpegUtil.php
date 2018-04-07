@@ -9,6 +9,8 @@
 namespace Myf\Libs;
 
 
+use Illuminate\Contracts\Logging\Log;
+
 class FfmpegUtil
 {
 
@@ -76,6 +78,11 @@ class FfmpegUtil
                 $thumbInfo['mime']=$thumbSize['mime'];
                 $thumbInfo['file']=$thumbFile;
                 $thumbInfo['size']=filesize($thumbFile);
+                //如果视频截取不到长宽,取截图的
+                if($video['width']<=0){
+                    $video['width']=$thumbSize[0];
+                    $video['height']=$thumbSize[1];
+                }
             }else{
                 //如果播放时长小于三秒，取第一秒的内容
                 if($ss>0 && $video['seconds']<$ss && $video['seconds']>=0){
